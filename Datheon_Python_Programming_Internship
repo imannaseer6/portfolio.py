@@ -1,0 +1,111 @@
+
+import csv
+
+portfolio = {}
+
+print("===== STOCK PORTFOLIO PERFORMANCE TRACKER =====")
+
+while True:
+    ticker = input("\nEnter stock ticker (or 'done' to finish): ").strip().upper()
+
+    if ticker == "DONE":
+        break
+
+    if not ticker:
+        print("Please enter a valid stock ticker.")
+        continue
+
+    try:
+        buy_price = float(input("Enter purchase price per share: "))
+        quantity = int(input("Enter number of shares: "))
+        current_price = float(input("Enter current price per share: "))
+
+        if buy_price <= 0 or current_price < 0 or quantity <= 0:
+            print("Invalid values. Please try again.")
+            continue
+
+        invested = buy_price * quantity
+        market_value = current_price * quantity
+        gain_loss = market_value - invested
+        percentage = (gain_loss / invested) * 100
+
+        portfolio[ticker] = {
+            "buy_price": buy_price,
+            "quantity": quantity,
+            "current_price": current_price,
+            "invested": invested,
+            "market_value": market_value,
+            "gain_loss": gain_loss,
+            "percentage": percentage
+        }
+
+        print(f"{ticker} added successfully!")
+
+    except ValueError:
+        print("Invalid input! Enter valid numeric values.")
+
+if portfolio:
+    total_invested = sum(
+        stock["invested"] for stock in portfolio.values()
+    )
+    total_value = sum(
+        stock["market_value"] for stock in portfolio.values()
+    )
+    total_gain_loss = total_value - total_invested
+
+    total_percentage = (
+        (total_gain_loss / total_invested) * 100
+        if total_invested else 0
+    )
+
+    print("\n===== PORTFOLIO PERFORMANCE =====")
+
+    for ticker, stock in portfolio.items():
+        print(f"\nStock: {ticker}")
+        print(f"Purchase Price: ${stock['buy_price']:.2f}")
+        print(f"Quantity: {stock['quantity']}")
+        print(f"Current Price: ${stock['current_price']:.2f}")
+        print(f"Invested Amount: ${stock['invested']:.2f}")
+        print(f"Current Value: ${stock['market_value']:.2f}")
+        print(f"Gain/Loss: ${stock['gain_loss']:.2f}")
+        print(f"Performance: {stock['percentage']:.2f}%")
+
+    print("\n===== TOTAL SUMMARY =====")
+    print(f"Total Investment: ${total_invested:.2f}")
+    print(f"Total Portfolio Value: ${total_value:.2f}")
+    print(f"Total Gain/Loss: ${total_gain_loss:.2f}")
+    print(f"Overall Performance: {total_percentage:.2f}%")
+
+    with open("portfolio_summary.csv", "w", newline="") as file:
+        writer = csv.writer(file)
+
+        writer.writerow([
+            "Ticker", "Purchase Price", "Quantity",
+            "Current Price", "Invested Amount",
+            "Current Value", "Gain/Loss", "Performance (%)"
+        ])
+
+        for ticker, stock in portfolio.items():
+            writer.writerow([
+                ticker,
+                stock["buy_price"],
+                stock["quantity"],
+                stock["current_price"],
+                stock["invested"],
+                stock["market_value"],
+                stock["gain_loss"],
+                round(stock["percentage"], 2)
+            ])
+
+        writer.writerow([])
+        writer.writerow(["Total Investment", total_invested])
+        writer.writerow(["Total Portfolio Value", total_value])
+        writer.writerow(["Total Gain/Loss", total_gain_loss])
+        writer.writerow(["Overall Performance (%)", round(total_percentage, 2)])
+
+    print("\nPortfolio summary saved to portfolio_summary.csv")
+
+else:
+    print("\nNo stocks were added to the portfolio.")
+
+print("Thank you for using Stock Portfolio Performance Tracker!")
